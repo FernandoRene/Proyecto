@@ -4,9 +4,12 @@ import actions.AlertDom;
 import com.aventstack.extentreports.Status;
 import helpers.ReportManager;
 import helpers.ScreenShotHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import tasks.*;
@@ -16,8 +19,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BaseTest {
     protected WebDriver driver;
-    private String url = "https://www.demoblaze.com/";
-
+    //private String url = "https://www.demoblaze.com/";
+    private String url;
+    private String browser;
+    private static final Logger log = LogManager.getLogger(BaseTest.class);
 
     @BeforeSuite
     public static void setupSuite () throws Exception {
@@ -25,14 +30,14 @@ public class BaseTest {
     }
 
     @BeforeMethod
-    @Parameters({"url", "browser"})
-    public void setUp (Method method) throws Exception {
-        //public void setUp (String url, String browser) throws Exception {
-        //public void setUp (ITestResult iTestResult) throws Exception {
-        String url = "https://www.demoblaze.com/";
-        String browser = "chrome";
-        //public void setUp (ITestResult iTestResult, String url, String browser) throws Exception {
-        //ReportManager.getInstance().startTest(iTestResult.getMethod().getDescription());
+    //@Parameters({"url", "browser"})
+    public void setUp (Method method, ITestContext context) throws Exception {
+
+        url = context.getCurrentXmlTest().getParameter("url");
+        browser = context.getCurrentXmlTest().getParameter("browser");
+        log.info("Navigate to {}", url);
+        log.info("Browser to {}", browser);
+
         ReportManager.getInstance().startTest(method.getName());
         switch (browser) {
             case "chrome":
@@ -44,32 +49,12 @@ public class BaseTest {
                 driver = new FirefoxDriver();
                 break;
             default:
-                throw new Exception(browser + "no soportado");
+                throw new Exception(browser + "not support");
         }
 
         driver.get(url);
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-
-        SelectCategory.selectLaptop(driver);
-
-        SelectSpecificProduct.selectProduct(driver, "Sony vaio i7");
-
-        AddToCart.AddButton(driver);
-        AlertDom.accept(driver);
-        GoToCart.GoToCartButton(driver);
-        PlaceOrders.PlaceOrderTask(driver);
-
-        EnterBillInformation.enterName(driver, "Maria");
-        EnterBillInformation.enterCountry(driver, "Moreira");
-        EnterBillInformation.enterCity(driver, "Cochambamba");
-        EnterBillInformation.enterCreditCard(driver, "525312d3712231");
-        EnterBillInformation.enterMonth(driver, "Junio");
-        EnterBillInformation.enterYear(driver, "2009");
-
-        ClickOnPurchase.clickPurchase(driver);
-
-        ClosePurchase.lastbutton(driver);
     }
 
     @AfterMethod
@@ -95,6 +80,7 @@ public class BaseTest {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
         } finally {
             if (driver != null)
                 driver.quit();

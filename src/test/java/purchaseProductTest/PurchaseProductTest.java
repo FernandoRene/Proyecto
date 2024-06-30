@@ -9,6 +9,8 @@ import helpers.JsonTestDataHelper;
 import helpers.ScreenShotHelper;
 import models.Client;
 import org.testng.Assert;
+import org.testng.ITestContext;
+import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -20,13 +22,15 @@ import ui.PurchaseConfirmationUI;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PurchaseProductTest extends BaseTest {
     public static String loginTestDataPath = "resources/testdata/placeOrder/";
 
     @Test(description = "Validar que los detalles del producto sean correctos en la pagina de la orden")
     public void validateDetailsProductTest() throws IOException, InterruptedException {
-        String expectedProductName = "Sony vaio i7";
+        String expectedProductName = "MacBook air";
 
         SelectCategory.selectLaptop(driver);
         Thread.sleep(2000);
@@ -51,7 +55,7 @@ public class PurchaseProductTest extends BaseTest {
 
     @Test(description = "Validar que una orden fue completada satisfactoriamente", dataProvider = "clientDataProvider")
     public void validateCompletePurchase(Client client) throws IOException, InterruptedException {
-        String productName = "Sony vaio i7";
+        String productName = "2017 Dell 15.6 Inch";
 
         SelectCategory.selectLaptop(driver);
         Thread.sleep(2000);
@@ -90,13 +94,13 @@ public class PurchaseProductTest extends BaseTest {
 
     @DataProvider(name="clientDataProvider")
     public Object[] loginDataProvider() throws FileNotFoundException {
-        return JsonTestDataHelper.getInstance().geTestData(loginTestDataPath + "clientData.json", Client.class);
+        return JsonTestDataHelper.getInstance().geTestData(loginTestDataPath + "clientDataList.json", Client.class);
     }
 
 
     @BeforeMethod
     @Override
-    public void setUp(Method method) throws Exception {
-        super.setUp( method);
+    public void setUp(Method method, ITestContext iTestContext) throws Exception {
+        super.setUp(method,iTestContext);
     }
 }
